@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container">
+    <h2 class="text-center mb-4 text-primary">👨‍💼 Admin Dashboard</h2>
+
+    <!-- Quick Stats -->
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card text-bg-info shadow">
+                <div class="card-body">
+                    <h5 class="card-title">Total Users</h5>
+                    <p class="card-text fs-4">{{ total_users }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card text-bg-success shadow">
+                <div class="card-body">
+                    <h5 class="card-title">Total Entries</h5>
+                    <p class="card-text fs-4">{{ total_entries }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card text-bg-secondary shadow">
+                <div class="card-body">
+                    <h5 class="card-title">Total Categories</h5>
+                    <p class="card-text fs-4">{{ total_categories }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="card mt-4">
+    <div class="card-header bg-dark text-white">
+        <i class="fas fa-file-alt"></i> Audit Logs
+    </div>
+    <div class="card-body" style="max-height: 200px; overflow-y: auto; white-space: pre-wrap;">
+        {% if logs %}
+            <code>{{ logs }}</code>
+        {% else %}
+            <p>No logs found.</p>
+        {% endif %}
+    </div>
+</div>
+
+
+
+    <!-- Log Viewer -->
+    <div class="card shadow-sm mb-5">
+        <div class="card-header bg-dark text-white">
+            📄 Audit Logs
+        </div>
+        <div class="card-body" style="max-height: 400px; overflow-y: auto; background-color: #f8f9fa;">
+            {% if logs %}
+                <pre style="white-space: pre-wrap; font-size: 0.9rem;">{{ logs }}</pre>
+            {% else %}
+                <p>No logs found.</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Navigation -->
+    <div class="text-center">
+        <a href="{{ url_for('main.dashboard') }}" class="btn btn-outline-primary me-2">🔙 Back to Dashboard</a>
+        <a href="{{ url_for('main.download_csv') }}" class="btn btn-outline-success me-2">⬇️ Download CSV</a>
+        <a href="{{ url_for('main.download_json') }}" class="btn btn-outline-info">⬇️ Download JSON</a>
+    </div>
+</div>
+{% endblock %}

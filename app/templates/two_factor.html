@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Two-Factor Authentication</title>
+</head>
+<body>
+    <h2>Two-Factor Authentication</h2>
+    <p>A 6-digit code has been sent to your email. Please enter it below to verify your login.</p>
+
+    <form method="POST">
+        <label for="code">Enter 2FA Code:</label><br>
+        <input type="text" id="code" name="code" pattern="\d{6}" maxlength="6" required>
+        <br><br>
+        <button type="submit">Verify</button>
+    </form>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category }}">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+</body>
+</html>

@@ -1,0 +1,222 @@
+{% extends "base.html" %}
+{% block content %}
+<h2 class="mb-4">Dashboard</h2>
+
+<!-- Dark Mode Toggle -->
+<div class="form-check form-switch float-end mb-3">
+    <input class="form-check-input" type="checkbox" id="darkModeToggle">
+    <label class="form-check-label" for="darkModeToggle">Dark Mode</label>
+</div>
+
+<!-- Filter Form -->
+<form method="get" class="mb-4 p-3 bg-light rounded shadow-sm">
+  <div class="row g-2 align-items-end">
+    <div class="col-md-3">
+      <label for="category" class="form-label">Category</label>
+      <select name="category" id="category" class="form-select">
+        <option value="">All Categories</option>
+        {% for cat in categories %}
+          <option value="{{ cat.name }}" {% if selected_category == cat.name %}selected{% endif %}>{{ cat.name }}</option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div class="col-md-2">
+      <label for="type" class="form-label">Type</label>
+      <select name="type" id="type" class="form-select">
+        <option value="">All</option>
+        <option value="income" {% if selected_type == 'income' %}selected{% endif %}>Income</option>
+        <option value="expense" {% if selected_type == 'expense' %}selected{% endif %}>Expense</option>
+      </select>
+    </div>
+
+    <div class="col-md-2">
+      <label for="start_date" class="form-label">From</label>
+      <input type="date" name="start_date" class="form-control" value="{{ start_date }}">
+    </div>
+
+    <div class="col-md-2">
+      <label for="end_date" class="form-label">To</label>
+      <input type="date" name="end_date" class="form-control" value="{{ end_date }}">
+    </div>
+
+    <div class="col-md-2 d-grid">
+      <button type="submit" class="btn btn-primary">Filter</button>
+    </div>
+
+    <div class="col-md-1 d-grid">
+      <a href="{{ url_for('main.dashboard') }}" class="btn btn-secondary">Reset</a>
+    </div>
+  </div>
+</form>
+
+<!-- Budget Entry Form -->
+<form method="POST" action="{{ url_for('main.dashboard') }}">
+    {{ form.hidden_tag() }}
+    <div class="row mb-3">
+        <div class="col-md-3">
+            {{ form.date.label(class="form-label") }}
+            {{ form.date(class="form-control") }}
+        </div>
+        <div class="col-md-3">
+            {{ form.category.label(class="form-label") }}
+            {{ form.category(class="form-control") }}
+        </div>
+        <div class="col-md-2">
+            {{ form.amount.label(class="form-label") }}
+            {{ form.amount(class="form-control") }}
+        </div>
+        <div class="col-md-2">
+            {{ form.type.label(class="form-label") }}
+            {{ form.type(class="form-control") }}
+        </div>
+        <div class="col-md-2 d-grid">
+            {{ form.submit(class="btn btn-success mt-4") }}
+        </div>
+    </div>
+</form>
+
+<!-- Add New Category Form -->
+<form method="POST" action="{{ url_for('main.add_category') }}" class="row g-2 mb-4">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <div class="col-md-3">
+        <input type="text" name="new_category" placeholder="New category" class="form-control" required>
+    </div>
+    <div class="col-md-2">
+        <button type="submit" class="btn btn-outline-primary">Add Category</button>
+    </div>
+</form>
+
+<!-- Totals -->
+<div class="row my-4">
+    <div class="col-md-4">
+        <div class="alert alert-success"><strong>Total Income:</strong> €{{ total_income }}</div>
+    </div>
+    <div class="col-md-4">
+        <div class="alert alert-danger"><strong>Total Expenses:</strong> €{{ total_expense }}</div>
+    </div>
+    <div class="col-md-4">
+        <div class="alert alert-info"><strong>Balance:</strong> €{{ balance }}</div>
+    </div>
+</div>
+
+<!-- AI Tips -->
+{% if tips %}
+<div class="alert alert-info">
+    <ul>
+        {% for tip in tips %}
+        <li>{{ tip }}</li>
+        {% endfor %}
+    </ul>
+</div>
+{% endif %}
+
+<!-- Monthly Breakdown Chart -->
+<h4 class="mt-5">📊 Monthly Breakdown</h4>
+<div class="card p-3 shadow-sm mb-4 mx-auto" style="max-width: 600px;">
+    <canvas id="breakdownChart" height="200"></canvas>
+</div>
+
+<!-- Download Buttons -->
+<div class="text-center mb-4">
+    <a href="{{ url_for('main.download_csv') }}" class="btn btn-outline-secondary me-2">
+        <i class="bi bi-file-earmark-arrow-down-fill"></i> Download CSV
+    </a>
+    <a href="{{ url_for('main.download_json') }}" class="btn btn-outline-primary">
+        <i class="bi bi-filetype-json"></i> Download JSON
+    </a>
+</div>
+
+<!-- Table of Entries -->
+<h4 class="mt-3">🧾 Recent Entries</h4>
+{% if entries %}
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Date</th>
+            <th>Category</th>
+            <th>Amount (€)</th>
+            <th>Type</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for entry in entries %}
+        <tr>
+            <td>{{ entry.date.strftime('%Y-%m-%d') }}</td>
+            <td><span class="badge bg-secondary">{{ entry.category }}</span></td>
+            <td>{{ entry.amount }}</td>
+            <td>
+                {% if entry.type == 'income' %}
+                <span class="badge bg-success">{{ entry.type }}</span>
+                {% else %}
+                <span class="badge bg-danger">{{ entry.type }}</span>
+                {% endif %}
+            </td>
+            <td>
+                <a href="{{ url_for('main.edit_entry', entry_id=entry.id) }}" class="btn btn-sm btn-primary">Edit</a>
+                <form action="{{ url_for('main.delete_entry', entry_id=entry.id) }}" method="POST" style="display:inline;">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure?')">Delete</button>
+                </form>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p>No entries found yet.</p>
+{% endif %}
+
+<!-- Chart.js Script -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+const ctx = document.getElementById('breakdownChart').getContext('2d');
+const breakdownChart = new Chart(ctx, {
+    type: 'bar',
+    data: {
+        labels: {{ chart_labels | tojson }},
+        datasets: [{
+            label: 'Expenses (€)',
+            data: {{ chart_data | tojson }},
+            backgroundColor: 'rgba(54, 162, 235, 0.7)',
+            borderRadius: 5,
+            barThickness: 40
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: {
+            title: {
+                display: true,
+                text: 'Monthly Expense Breakdown'
+            },
+            legend: { display: false }
+        },
+        scales: {
+            y: {
+                beginAtZero: true
+            }
+        }
+    }
+});
+</script>
+
+<!-- Delete Account -->
+<form action="{{ url_for('main.delete_account') }}" method="POST">
+    {{ delete_form.hidden_tag() }}
+    <button type="submit" class="btn btn-danger mt-3"
+        onclick="return confirm('Are you sure? This will delete your account and all data.')">
+        Delete My Account
+    </button>
+</form>
+
+<!-- Dark Mode Script -->
+<script>
+document.getElementById('darkModeToggle').addEventListener('change', function () {
+    document.body.classList.toggle('bg-dark');
+    document.body.classList.toggle('text-light');
+    document.querySelectorAll('.table').forEach(t => t.classList.toggle('table-dark'));
+});
+</script>
+{% endblock %}

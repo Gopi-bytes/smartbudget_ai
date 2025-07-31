@@ -1,0 +1,126 @@
+[2025-06-23 15:15:51] SmartBudget AI app started.
+[2025-06-23 15:16:00] SmartBudget AI app started.
+[2025-06-23 15:16:01] SmartBudget AI app started.
+[2025-06-23 15:16:14] User abcd@gmail.com logged in
+[2025-06-27 11:07:48] SmartBudget AI app started.
+[2025-06-27 11:07:49] SmartBudget AI app started.
+[2025-06-27 11:08:08] User abcd@gmail.com logged in
+[2025-07-01 10:48:41] SmartBudget AI app started.
+[2025-07-01 10:48:42] SmartBudget AI app started.
+[2025-07-01 10:49:59] User abcd@gmail.com logged in
+[2025-07-01 11:11:16] SmartBudget AI app started.
+[2025-07-01 11:11:17] SmartBudget AI app started.
+[2025-07-01 11:12:08] SmartBudget AI app started.
+[2025-07-01 11:12:23] SmartBudget AI app started.
+[2025-07-01 11:19:22] SmartBudget AI app started.
+[2025-07-01 11:21:08] SmartBudget AI app started.
+[2025-07-01 11:21:48] SmartBudget AI app started.
+[2025-07-01 11:24:37] SmartBudget AI app started.
+[2025-07-01 11:25:22] SmartBudget AI app started.
+[2025-07-01 11:38:28] SmartBudget AI app started.
+[2025-07-01 11:39:55] User admin@example.com logged in
+[2025-07-01 11:41:09] User abcd@gmail.com logged in
+[2025-07-01 11:43:03] SmartBudget AI app started.
+[2025-07-01 11:43:16] User abcd@gmail.com logged in
+[2025-07-01 11:43:20] abcd@gmail.com downloaded JSON data
+[2025-07-01 11:46:41] User abcd@gmail.com logged in
+[2025-07-01 11:47:53] SmartBudget AI app started.
+[2025-07-01 11:48:02] User abcd@gmail.com logged in
+[2025-07-01 11:50:18] SmartBudget AI app started.
+[2025-07-01 11:50:40] New user registered: delete@gmail.com
+[2025-07-01 11:50:44] User delete@gmail.com logged in
+[2025-07-01 11:53:11] SmartBudget AI app started.
+[2025-07-01 11:53:18] User delete@gmail.com logged in
+[2025-07-01 11:54:31] SmartBudget AI app started.
+[2025-07-01 11:54:49] User delete@gmail.com logged in
+[2025-07-01 12:03:32] SmartBudget AI app started.
+[2025-07-01 12:03:42] User delete@gmail.com logged in
+[2025-07-01 12:08:52] SmartBudget AI app started.
+[2025-07-01 12:08:59] User delete@gmail.com logged in
+[2025-07-01 12:15:13] SmartBudget AI app started.
+[2025-07-01 12:15:33] User delete@gmail.com logged in
+[2025-07-01 12:15:33] Exception on /dashboard [GET]
+Traceback (most recent call last):
+  File "C:\Users\bhoja\smartbudget_ai\venv\Lib\site-packages\flask\app.py", line 1511, in wsgi_app
+    response = self.full_dispatch_request()
+  File "C:\Users\bhoja\smartbudget_ai\venv\Lib\site-packages\flask\app.py", line 919, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "C:\Users\bhoja\smartbudget_ai\venv\Lib\site-packages\flask\app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "C:\Users\bhoja\smartbudget_ai\venv\Lib\site-packages\flask\app.py", line 902, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\bhoja\smartbudget_ai\venv\Lib\site-packages\flask_login\utils.py", line 290, in decorated_view
+    return current_app.ensure_sync(func)(*args, **kwargs)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\bhoja\smartbudget_ai\app\routes.py", line 87, in dashboard
+    delete_form = DeleteAccountForm()
+                  ^^^^^^^^^^^^^^^^^
+NameError: name 'DeleteAccountForm' is not defined
+[2025-07-01 12:19:32] SmartBudget AI app started.
+[2025-07-01 12:19:47] User delete@gmail.com logged in
+[2025-07-01 12:32:50] SmartBudget AI app started.
+[2025-07-01 12:33:01] User delete@gmail.com logged in
+[2025-07-01 12:33:15] User abcd@gmail.com logged in
+[2025-07-01 12:36:46] SmartBudget AI app started.
+[2025-07-01 12:36:54] User abcd@gmail.com logged in
+[2025-07-01 12:46:15] SmartBudget AI app started.
+[2025-07-01 12:46:39] User abcd@gmail.com logged out
+[2025-07-01 12:46:44] User abcd@gmail.com logged in
+[2025-07-01 12:47:14] SmartBudget AI app started.
+[2025-07-01 12:47:22] User abcd@gmail.com logged in
+[2025-07-01 12:48:53] User abc@gmail.com logged in
+[2025-07-01 12:54:17] SmartBudget AI app started.
+[2025-07-01 12:54:23] User abc@gmail.com logged in
+[2025-07-01 12:54:28] User abc@gmail.com logged out
+[2025-07-01 12:57:03] User abc@gmail.com logged in
+[2025-07-01 12:57:10] SmartBudget AI app started.
+[2025-07-01 12:57:26] User abc@gmail.com logged in
+[2025-07-01 12:59:29] SmartBudget AI app started.
+[2025-07-01 12:59:47] User abc@gmail.com logged in
+[2025-07-01 13:03:57] SmartBudget AI app started.
+[2025-07-01 13:04:15] User abc@gmail.com logged in
+[2025-07-01 13:04:43] SmartBudget AI app started.
+[2025-07-01 13:04:48] User abc@gmail.com logged in
+[2025-07-01 13:05:53] SmartBudget AI app started.
+[2025-07-01 13:06:06] User abc@gmail.com logged in
+[2025-07-01 13:07:21] abc@gmail.com downloaded budget CSV
+[2025-07-01 13:18:46] User abc@gmail.com logged in
+[2025-07-01 13:25:01] SmartBudget AI app started.
+[2025-07-01 13:25:22] abc@gmail.com downloaded JSON data
+[2025-07-01 13:30:14] SmartBudget AI app started.
+[2025-07-01 13:38:59] SmartBudget AI app started.
+[2025-07-01 15:04:35] SmartBudget AI app started.
+[2025-07-01 15:04:45] User abc@gmail.com logged in
+[2025-07-01 15:07:56] SmartBudget AI app started.
+[2025-07-01 15:08:01] User abc@gmail.com logged out
+[2025-07-01 15:09:11] SmartBudget AI app started.
+[2025-07-01 15:09:15] User abc@gmail.com logged in
+[2025-07-01 15:09:16] User abc@gmail.com logged out
+[2025-07-01 15:12:27] SmartBudget AI app started.
+[2025-07-01 15:13:37] User abc@gmail.com logged in
+[2025-07-01 15:13:40] User abc@gmail.com logged out
+[2025-07-01 15:14:33] SmartBudget AI app started.
+[2025-07-01 15:16:33] SmartBudget AI app started.
+[2025-07-01 15:16:46] User abc@gmail.com logged in
+[2025-07-01 15:20:22] SmartBudget AI app started.
+[2025-07-01 15:22:37] SmartBudget AI app started.
+[2025-07-01 15:26:25] SmartBudget AI app started.
+[2025-07-01 15:26:37] User abc@gmail.com logged in
+[2025-07-01 16:00:16] User abc@gmail.com logged in
+[2025-07-01 16:00:59] User abc@gmail.com logged in
+[2025-07-01 16:01:52] User abc@gmail.com logged out
+[2025-07-01 16:02:05] User abc@gmail.com logged in
+[2025-07-01 16:02:34] User admin@example.com logged in
+[2025-07-01 16:09:13] SmartBudget AI app started.
+[2025-07-01 16:09:33] User admin@example.com logged out
+[2025-07-01 16:09:38] User abc@gmail.com logged in
+[2025-07-01 16:10:23] User abc@gmail.com logged out
+[2025-07-01 16:10:28] User admin@example.com logged in
+[2025-07-01 16:10:41] admin@example.com downloaded budget CSV
+[2025-07-01 16:18:30] SmartBudget AI app started.
+[2025-07-01 16:19:13] User admin@example.com logged out
+[2025-07-01 16:19:18] User abc@gmail.com logged in
+[2025-07-01 16:20:14] abc@gmail.com deleted entry #14
+[2025-07-01 16:20:40] User abc@gmail.com logged out
+[2025-07-01 16:20:45] User admin@example.com logged in

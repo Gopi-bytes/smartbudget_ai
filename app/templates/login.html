@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Login - SmartBudget AI</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/login.css') }}">
+</head>
+<body>
+    <div class="login-container">
+        <img src="{{ url_for('static', filename='img/login_banner.png') }}" alt="Login Banner" class="login-banner">
+        <form method="POST" action="{{ url_for('main.login') }}" class="login-form">
+            {{ form.hidden_tag() }}
+            {{ form.email.label }}
+            {{ form.email(class="form-input") }}
+
+            {{ form.password.label }}
+            {{ form.password(class="form-input") }}
+
+            {{ form.submit(class="form-button") }}
+            <p class="register-text">Don’t have an account? <a href="{{ url_for('main.register') }}">Register here</a></p>
+        </form>
+    </div>
+</body>
+</html>

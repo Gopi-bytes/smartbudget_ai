@@ -1,8 +1,8 @@
-# routes.py (Hardened + Debug logging)
+# routes.py (Hardened + Debug logging + session fixes)
 
 from flask import (
     Blueprint, render_template, redirect, url_for, flash, request, make_response,
-    jsonify, current_app, abort
+    jsonify, current_app, abort, session
 )
 from app import db, bcrypt, limiter
 from app.forms import RegistrationForm, LoginForm, BudgetForm, DeleteAccountForm
@@ -24,6 +24,14 @@ def ratelimit_handler(e):
         return render_template("429.html"), 429
     return jsonify(error="Too many requests. Please try again later."), 429
 
+# ---- Debug: who is logged in?
+@main.route("/_whoami")
+def whoami():
+    return {
+        "authenticated": current_user.is_authenticated,
+        "email": getattr(current_user, "email", None)
+    }, 200
+
 @main.route("/")
 @main.route("/home")
 def home():
@@ -38,27 +46,23 @@ def register():
         db.session.add(user)
         db.session.commit()
 
-        # Add default categories
+        # Default categories
         default_categories = ['Food', 'Rent', 'Utilities', 'Salary', 'Entertainment', 'Other']
         for cat in default_categories:
             db.session.add(Category(name=cat, user_id=user.id))
         db.session.commit()
 
-        # ✅ Log registration to Render logs
         current_app.logger.info(f"[REGISTER] New user created: {user.email} (ID: {user.id})")
-
         flash('Account created!', 'success')
         return redirect(url_for('main.login'))
     else:
-        # Log form errors if registration fails
         if form.errors:
             current_app.logger.warning(f"[REGISTER] Failed: {form.errors}")
 
     return render_template('register.html', form=form)
 
-
 @main.route("/login", methods=['GET', 'POST'])
-@limiter.limit("5 per minute")
+@limiter.exempt   # ⬅️ disable rate limit during debugging
 def login():
     form = LoginForm()
     if form.validate_on_submit():
@@ -75,10 +79,8 @@ def login():
             return redirect(url_for('main.dashboard'))
         else:
             current_app.logger.warning(f"[LOGIN] FAILED for {form.email.data}")
-
-        flash('Login failed. Please check your email or password.', 'danger')
+            flash('Login failed. Please check your email or password.', 'danger')
     else:
-        # Log form validation errors
         if form.errors:
             current_app.logger.warning(f"[LOGIN] Form errors: {form.errors}")
 
@@ -89,6 +91,8 @@ def login():
 def logout():
     current_app.logger.info(f"User {current_user.email} logged out")
     logout_user()
+    session.clear()  # ⬅️ ensure no stale session data remains
+    flash("Logged out successfully.", "info")
     return redirect(url_for('main.login'))
 
 @main.route("/dashboard", methods=["GET", "POST"])
@@ -116,15 +120,13 @@ def dashboard():
         flash("Entry added successfully!", "success")
         return redirect(url_for('main.dashboard'))
 
-    # Extract filter query params
+    # Filters
     selected_category = request.args.get("category", default=None, type=str)
     selected_type = request.args.get("type", default=None, type=str)
     start_date = request.args.get("start_date", type=str)
     end_date = request.args.get("end_date", type=str)
 
-    # Base query
     query = BudgetEntry.query.filter_by(user_id=current_user.id)
-
     if selected_category:
         query = query.filter_by(category=selected_category)
     if selected_type:

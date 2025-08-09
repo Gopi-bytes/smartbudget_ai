@@ -8,8 +8,33 @@
 <body>
     <div class="login-container">
         <img src="{{ url_for('static', filename='img/login_banner.png') }}" alt="Login Banner" class="login-banner">
+
+        <!-- 🔹 Flash messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            <ul class="flashes">
+              {% for category, msg in messages %}
+                <li class="{{ category }}">{{ msg }}</li>
+              {% endfor %}
+            </ul>
+          {% endif %}
+        {% endwith %}
+
+        <!-- 🔹 Form errors -->
+        {% if form.errors %}
+          <ul class="form-errors">
+            {% for field, errs in form.errors.items() %}
+              {% for err in errs %}
+                <li>{{ field }}: {{ err }}</li>
+              {% endfor %}
+            {% endfor %}
+          </ul>
+        {% endif %}
+
+        <!-- Login form -->
         <form method="POST" action="{{ url_for('main.login') }}" class="login-form">
             {{ form.hidden_tag() }}
+
             {{ form.email.label }}
             {{ form.email(class="form-input") }}
 

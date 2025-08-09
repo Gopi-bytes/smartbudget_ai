@@ -1,6 +1,29 @@
 {% extends "base.html" %}
 {% block content %}
     <h2 class="mb-4">Register</h2>
+
+    <!-- 🔹 Flash messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <ul class="flashes">
+          {% for category, msg in messages %}
+            <li class="{{ category }}">{{ msg }}</li>
+          {% endfor %}
+        </ul>
+      {% endif %}
+    {% endwith %}
+
+    <!-- 🔹 Form errors -->
+    {% if form.errors %}
+      <ul class="form-errors">
+        {% for field, errs in form.errors.items() %}
+          {% for err in errs %}
+            <li>{{ field }}: {{ err }}</li>
+          {% endfor %}
+        {% endfor %}
+      </ul>
+    {% endif %}
+
     <form method="POST">
         {{ form.hidden_tag() }}
         <div class="mb-3">

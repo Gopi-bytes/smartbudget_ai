@@ -24,21 +24,30 @@ login_manager.login_view = 'main.login'
 login_manager.login_message_category = 'info'
 
 def create_app():
-    # Create Flask app with instance-relative configuration
     app = Flask(__name__, instance_relative_config=True)
-    
-    # Load other configuration values from Config object
+
+    # Load base config
     app.config.from_object(Config)
 
-    # Ensure that the instance folder exists
+    # Secret key from env (Render) with safe fallback
+    app.config['SECRET_KEY'] = os.environ.get(
+        'FLASK_SECRET_KEY',
+        app.config.get('SECRET_KEY', 'change-me-in-prod')
+    )
+
+    # Ensure instance/ exists (for sqlite file)
     os.makedirs(app.instance_path, exist_ok=True)
 
-    # Default to a SQLite database in the instance folder if none specified
+    # Default to SQLite in instance/ if no DB URI provided
     if not app.config.get('SQLALCHEMY_DATABASE_URI'):
         db_path = os.path.join(app.instance_path, 'smartbudget.db')
         app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + db_path
 
-    # Initialize extensions
+    # Session cookie settings for HTTPS on Render
+    app.config.setdefault('SESSION_COOKIE_SECURE', True)
+    app.config.setdefault('SESSION_COOKIE_SAMESITE', 'None')
+
+    # Init extensions
     db.init_app(app)
     bcrypt.init_app(app)
     login_manager.init_app(app)
@@ -46,7 +55,7 @@ def create_app():
     limiter.init_app(app)
     csrf.init_app(app)
 
-    # Register Blueprints
+    # Register blueprints
     from app.routes import main
     app.register_blueprint(main)
 
@@ -54,23 +63,19 @@ def create_app():
     with app.app_context():
         db.create_all()
 
-    # Handle CSRF errors gracefully
+    # CSRF error handling
     @app.errorhandler(CSRFError)
     def handle_csrf_error(e):
         return render_template("csrf_error.html", reason=e.description), 400
 
-    # Logging Setup
-    if not os.path.exists('logs'):
-        os.mkdir('logs')
-
+    # Logging
+    os.makedirs('logs', exist_ok=True)
     log_path = os.path.join('logs', 'audit.log')
     file_handler = RotatingFileHandler(log_path, maxBytes=10240, backupCount=3)
     file_handler.setFormatter(logging.Formatter('[%(asctime)s] %(message)s', "%Y-%m-%d %H:%M:%S"))
     file_handler.setLevel(logging.INFO)
-
     if not app.logger.handlers:
         app.logger.addHandler(file_handler)
-
     app.logger.setLevel(logging.INFO)
     app.logger.info("SmartBudget AI app started.")
 

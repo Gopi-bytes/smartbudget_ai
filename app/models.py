@@ -4,6 +4,7 @@ from flask_login import UserMixin
 # User loader for Flask-Login
 @login_manager.user_loader
 def load_user(user_id):
+    """Return user by ID for Flask-Login."""
     return User.query.get(int(user_id))
 
 # User Model
@@ -12,7 +13,7 @@ class User(db.Model, UserMixin):
     email = db.Column(db.String(120), unique=True, nullable=False)
     password = db.Column(db.String(60), nullable=False)
     
-    # ✅ Role: 'user' (default) or 'admin'
+    # Role: 'user' (default) or 'admin'
     role = db.Column(db.String(10), nullable=False, default='user')
 
     # Relationships

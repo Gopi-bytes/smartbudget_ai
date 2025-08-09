@@ -1,7 +1,7 @@
-# routes.py (Cleaned and Optimized Version)
+# routes.py (Hardened + Debug logging)
 
 from flask import (
-    Blueprint, render_template, redirect, url_for, flash, request, make_response, 
+    Blueprint, render_template, redirect, url_for, flash, request, make_response,
     jsonify, current_app, abort
 )
 from app import db, bcrypt, limiter
@@ -12,6 +12,7 @@ from datetime import datetime, timedelta
 from collections import defaultdict, Counter
 from calendar import month_name
 from app.utils import admin_required
+from sqlalchemy.exc import IntegrityError
 import csv
 import io
 
@@ -37,15 +38,24 @@ def register():
         db.session.add(user)
         db.session.commit()
 
+        # Add default categories
         default_categories = ['Food', 'Rent', 'Utilities', 'Salary', 'Entertainment', 'Other']
         for cat in default_categories:
             db.session.add(Category(name=cat, user_id=user.id))
         db.session.commit()
 
-        current_app.logger.info(f"New user registered: {user.email}")
+        # ✅ Log registration to Render logs
+        current_app.logger.info(f"[REGISTER] New user created: {user.email} (ID: {user.id})")
+
         flash('Account created!', 'success')
         return redirect(url_for('main.login'))
+    else:
+        # Log form errors if registration fails
+        if form.errors:
+            current_app.logger.warning(f"[REGISTER] Failed: {form.errors}")
+
     return render_template('register.html', form=form)
+
 
 @main.route("/login", methods=['GET', 'POST'])
 @limiter.limit("5 per minute")
@@ -53,11 +63,25 @@ def login():
     form = LoginForm()
     if form.validate_on_submit():
         user = User.query.filter_by(email=form.email.data).first()
+
+        if user:
+            current_app.logger.info(f"[LOGIN] User found in DB: {user.email} (ID: {user.id})")
+        else:
+            current_app.logger.warning(f"[LOGIN] No user found with email: {form.email.data}")
+
         if user and bcrypt.check_password_hash(user.password, form.password.data):
             login_user(user)
-            current_app.logger.info(f"User {user.email} logged in")
+            current_app.logger.info(f"[LOGIN] SUCCESS for {user.email}")
             return redirect(url_for('main.dashboard'))
+        else:
+            current_app.logger.warning(f"[LOGIN] FAILED for {form.email.data}")
+
         flash('Login failed. Please check your email or password.', 'danger')
+    else:
+        # Log form validation errors
+        if form.errors:
+            current_app.logger.warning(f"[LOGIN] Form errors: {form.errors}")
+
     return render_template('login.html', form=form)
 
 @main.route("/logout")
@@ -126,7 +150,7 @@ def dashboard():
     if food_expenses > 150:
         tips.append("🍔 Your food expenses are high. Consider meal planning.")
 
-    # Chart Data (not filtered by default)
+    # Chart Data (last 6 months of expenses)
     monthly_data = defaultdict(float)
     for e in entries:
         if e.type == "expense":
@@ -136,7 +160,8 @@ def dashboard():
     chart_labels = list(monthly_data.keys())[-6:]
     chart_data = list(monthly_data.values())[-6:]
 
-    return render_template("dashboard.html",
+    return render_template(
+        "dashboard.html",
         form=form,
         delete_form=delete_form,
         entries=entries,
@@ -152,7 +177,6 @@ def dashboard():
         start_date=start_date,
         end_date=end_date
     )
-
 
 @main.route("/edit/<int:entry_id>", methods=["GET", "POST"])
 @login_required
@@ -287,10 +311,12 @@ def admin_dashboard():
     except FileNotFoundError:
         log_data = "No logs found."
 
-    return render_template("admin_dashboard.html",
-                           total_users=len(users),
-                           total_entries=len(entries),
-                           total_categories=categories,
-                           top_categories=top_categories,
-                           recent_users=recent_users,
-                           logs=log_data)
+    return render_template(
+        "admin_dashboard.html",
+        total_users=len(users),
+        total_entries=len(entries),
+        total_categories=categories,
+        top_categories=top_categories,
+        recent_users=recent_users,
+        logs=log_data
+    )

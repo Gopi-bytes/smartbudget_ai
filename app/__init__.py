@@ -6,6 +6,7 @@ from flask_migrate import Migrate
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 from flask_wtf.csrf import CSRFProtect, CSRFError
+from flask_session import Session
 from config import Config
 import logging
 from logging.handlers import RotatingFileHandler
@@ -18,52 +19,62 @@ login_manager = LoginManager()
 migrate = Migrate()
 limiter = Limiter(get_remote_address)
 csrf = CSRFProtect()
+session_ext = Session()
 
 # Login configuration
 login_manager.login_view = 'main.login'
 login_manager.login_message_category = 'info'
 
 def create_app():
+    # Create Flask app with instance-relative configuration
     app = Flask(__name__, instance_relative_config=True)
 
-    # Load base config
+    # Load config from config.py
     app.config.from_object(Config)
 
-    # Secret key from env (Render) with safe fallback
+    # Secret key
     app.config['SECRET_KEY'] = os.environ.get(
         'FLASK_SECRET_KEY',
         app.config.get('SECRET_KEY', 'change-me-in-prod')
     )
 
-    # Ensure instance/ exists (for sqlite file)
+    # Ensure instance folder exists
     os.makedirs(app.instance_path, exist_ok=True)
 
-    # Default to SQLite in instance/ if no DB URI provided
+    # Use SQLite in instance folder if no DB URI provided
     if not app.config.get('SQLALCHEMY_DATABASE_URI'):
         db_path = os.path.join(app.instance_path, 'smartbudget.db')
         app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + db_path
 
-    # Session cookie settings for HTTPS on Render
-    app.config.setdefault('SESSION_COOKIE_SECURE', True)
-    app.config.setdefault('SESSION_COOKIE_SAMESITE', 'None')
+    # Flask-Session config (server-side sessions)
+    app.config['SESSION_TYPE'] = 'filesystem'
+    app.config['SESSION_FILE_DIR'] = os.path.join(app.instance_path, 'flask_session')
+    app.config['SESSION_PERMANENT'] = False  # session ends when browser closes
+    os.makedirs(app.config['SESSION_FILE_DIR'], exist_ok=True)
 
-    # Init extensions
+    # Cookie settings
+    app.config['SESSION_COOKIE_SECURE'] = True
+    app.config['SESSION_COOKIE_SAMESITE'] = 'None'
+    app.config['SESSION_COOKIE_HTTPONLY'] = True
+
+    # Initialize extensions
     db.init_app(app)
     bcrypt.init_app(app)
     login_manager.init_app(app)
     migrate.init_app(app, db)
     limiter.init_app(app)
     csrf.init_app(app)
+    session_ext.init_app(app)
 
     # Register blueprints
     from app.routes import main
     app.register_blueprint(main)
 
-    # Create DB tables on first run
+    # Create DB tables
     with app.app_context():
         db.create_all()
 
-    # CSRF error handling
+    # CSRF error handler
     @app.errorhandler(CSRFError)
     def handle_csrf_error(e):
         return render_template("csrf_error.html", reason=e.description), 400

@@ -24,8 +24,19 @@ login_manager.login_view = 'main.login'
 login_manager.login_message_category = 'info'
 
 def create_app():
-    app = Flask(__name__)
+    # Create Flask app with instance-relative configuration
+    app = Flask(__name__, instance_relative_config=True)
+    
+    # Load other configuration values from Config object
     app.config.from_object(Config)
+
+    # Ensure that the instance folder exists
+    os.makedirs(app.instance_path, exist_ok=True)
+
+    # Default to a SQLite database in the instance folder if none specified
+    if not app.config.get('SQLALCHEMY_DATABASE_URI'):
+        db_path = os.path.join(app.instance_path, 'smartbudget.db')
+        app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + db_path
 
     # Initialize extensions
     db.init_app(app)
@@ -38,6 +49,10 @@ def create_app():
     # Register Blueprints
     from app.routes import main
     app.register_blueprint(main)
+
+    # Create DB tables on first run
+    with app.app_context():
+        db.create_all()
 
     # Handle CSRF errors gracefully
     @app.errorhandler(CSRFError)
@@ -53,7 +68,6 @@ def create_app():
     file_handler.setFormatter(logging.Formatter('[%(asctime)s] %(message)s', "%Y-%m-%d %H:%M:%S"))
     file_handler.setLevel(logging.INFO)
 
-    # Avoid adding multiple handlers during debug reloads
     if not app.logger.handlers:
         app.logger.addHandler(file_handler)
 
